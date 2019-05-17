@@ -16,7 +16,7 @@ def job():
     # from firebase import firebase
     # firebase = firebase.FirebaseApplication('https://betbalex.firebaseio.com/')
     webdriver_path = './chromedriver.exe'
-    url = 'https://www.betexplorer.com/soccer/sweden/allsvenskan/falkenbergs-djurgarden/QXjbCvnK/'
+    url = 'https://www.betexplorer.com/soccer/england/league-one/portsmouth-sunderland/GIVyhEsG/'
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--window-size=1920x1080')
@@ -35,10 +35,10 @@ def job():
     # shotter = soup.find('ul',{'class':'list-details list-details--shooters'})
     # shotter_1 = shotter.find_all('td')
     data = soup.find('tfoot', {'id': 'match-add-to-selection'})
+    datab = data.find_all('td')
     fcname = soup.find('title')
     fcname1 = fcname.text.replace(' - H2H stats, results, odds', '')
 
-    datab = data.find_all('td')
 
     named_tuple = time.localtime()  # get struct_time
     time_string = time.strftime("%m-%d-%Y, %H:%M:%S", named_tuple)
@@ -82,6 +82,8 @@ def job():
     ET.SubElement(root, "leg").text = flag
     ET.SubElement(root, "hometeam").text = hometeamimg
     ET.SubElement(root, "awayteam").text = awayteamimg
+    ET.SubElement(root, "score").text = matchtime_1[1].text
+
     tree = ET.ElementTree(root)
 
     tree.write(cwd + "\\" + headerRe + ".xml")
@@ -109,7 +111,7 @@ def job():
     fh.close()
 
 
-schedule.every(2).seconds.do(job)
+schedule.every(120).seconds.do(job)
 while True:
     schedule.run_pending()
 
