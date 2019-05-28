@@ -12,10 +12,13 @@ import xml.etree.cElementTree as ET
 import ftplib
 from pathlib import Path
 import mysql.connector
-
+import wget
 import mysql.connector
-import numpy as np
+import requests
 
+
+currentDT = datetime.datetime.now()
+timefilename = currentDT.strftime("%Y-%m-%d")
 def my_main_function():
      def job():
         mydb = mysql.connector.connect(
@@ -26,13 +29,20 @@ def my_main_function():
         )
 
         mycursor = mydb.cursor()
+        timefilename2 = timefilename+'.txt'
+        url = 'http://www.darunphop.com/BET/datafile/'+timefilename2
+        r = requests.get(url)
+        with open(timefilename2, 'wb') as f:
+         f.write(r.content)
 
-        multiurl = ['https://www.betexplorer.com/soccer/denmark/superliga/brondby-midtjylland/M3nOrvHs/',
-                    'https://www.betexplorer.com/soccer/russia/premier-league/rubin-kazan-anzhi/hK4Wajul/'
-                    ]
+        file = open(timefilename2, 'r')
+        getURL =  file.read()
+
+
+        multiurl = getURL
         for xlink in multiurl:
            url = xlink
-           print(multiurl)
+           print(url)
            webdriver_path = './chromedriver.exe'
 
            chrome_options = Options()
@@ -138,9 +148,9 @@ def my_main_function():
            print("uploaded->  " + csvfilename + "," + xmlfilename)
            fh.close()
 
-           sql = "INSERT IGNORE INTO betTeamName (betName,betNation,betL,betTime,betFleg) VALUES (%s,%s, %s,%s,%s)"
+           sql = "INSERT IGNORE INTO betTeamName (betName,betNation,betL,betTime,betFleg,betimgHome,betimgAway) VALUES (%s,%s, %s,%s,%s,%s,%s)"
            val = [
-               (headerRe1,header_1[2].text, header_1[3].text,matchtimeRe,flag)
+               (headerRe1,header_1[2].text, header_1[3].text,matchtimeRe,flag,hometeamimg,awayteamimg)
 
            ]
 
@@ -151,7 +161,7 @@ def my_main_function():
            print(mycursor.rowcount, "was inserted.")
 
 
-     schedule.every(120).seconds.do(job)
+     schedule.every(2).seconds.do(job)
 
 
 
