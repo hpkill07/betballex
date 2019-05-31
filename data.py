@@ -4,7 +4,6 @@ import datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-
 import os
 import fileinput
 import csv
@@ -15,11 +14,12 @@ import mysql.connector
 import wget
 import mysql.connector
 import requests
+import sys
+from os import execl
+import numpy as np
 
 
-currentDT = datetime.datetime.now()
-timefilename = currentDT.strftime("%Y-%m-%d")
-def my_main_function():
+def main():
      def job():
         mydb = mysql.connector.connect(
             host="202.129.206.136",
@@ -29,20 +29,16 @@ def my_main_function():
         )
 
         mycursor = mydb.cursor()
-        timefilename2 = timefilename+'.txt'
-        url = 'http://www.darunphop.com/BET/datafile/'+timefilename2
+        textfilename='listteam.txt'
+        url = 'http://www.darunphop.com/BET/datafile/'+textfilename
         r = requests.get(url)
-        with open(timefilename2, 'wb') as f:
+        with open(textfilename, 'wb') as f:
          f.write(r.content)
 
-        file = open(timefilename2, 'r')
-        getURL =  file.read()
+        file = open(textfilename, 'r')
 
-
-        multiurl = getURL
-        for xlink in multiurl:
+        for xlink in file:
            url = xlink
-           print(url)
            webdriver_path = './chromedriver.exe'
 
            chrome_options = Options()
@@ -70,7 +66,6 @@ def my_main_function():
            time_string = time.strftime("%m-%d-%Y, %H:%M:%S", named_tuple)
 
            i = len(datab)
-           dt = str(datetime.datetime.now())
 
            bet = 1
 
@@ -85,18 +80,37 @@ def my_main_function():
            headerRe1 = headerRe.replace(' ','')
            matchtimeRe = matchtime_1[0].text.replace('-','')
 
+           import datetime as dt
+           from datetime import date
+           from datetime import datetime
+           from datetime import timedelta
+           date_time_obj = dt.datetime.strptime(matchtimeRe, '%d.%m.%Y %H:%M')
+           date_time_obj_bkk = (date_time_obj + timedelta(hours=6))
+           now = datetime.now()
+           dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
+
+
            print(header_1[3].text)
            print(header_1[2].text)
            print(headerRe1)
            print(matchtimeRe)
+           print(date_time_obj_bkk)
+           print(dt_string)
            print(matchtime_1[1].text)
-
            print(array1)
+           print(type(date_time_obj_bkk))
+           date_format = '%Y-%m-%d %H:%M:%S'
+           a = datetime.strptime(date_time_obj_bkk, date_format)
+           b = datetime.strptime(nowdatetime, date_format)
+           nowdatetime = datetime.strptime(dt_string, '%Y-%m-%d %H:%M:%S')
+           if a >= b:
+              betStatus_1 = "0"
+              print("not yet")
+           else:
+              betStatus_1 ="1"
+              print("yet")
 
            flag = "https://www.betexplorer.com" + str(imgteam[0]['src'])
-           print(flag)
-           print(imgteam[1]['src'])
-           print(imgteam[2]['src'])
            cwd = os.getcwd()
 
            hometeamimg = str(imgteam[1]['src'])
@@ -119,7 +133,7 @@ def my_main_function():
            fileName = Path(headerRe1 + ".csv")
 
            if fileName.is_file():
-               print("csv exist")
+               print("csv already exist")
            else:
              with open(cwd + "\\" + headerRe1 + ".csv", "a", newline='') as csvfile:
               fieldnames = ['Date', 'Home', 'D', 'A']
@@ -145,33 +159,44 @@ def my_main_function():
 
            ftp_connection.storbinary('STOR %s' % csvfilename, fh)
            ftp_connection.storbinary('STOR %s' % xmlfilename, fl)
-           print("uploaded->  " + csvfilename + "," + xmlfilename)
+           print("uploaded ->  " + csvfilename + "," + xmlfilename)
            fh.close()
 
-           sql = "INSERT IGNORE INTO betTeamName (betName,betNation,betL,betTime,betFleg,betimgHome,betimgAway) VALUES (%s,%s, %s,%s,%s,%s,%s)"
+           sql = "INSERT IGNORE INTO betTeamName (betName,betNation,betL,betTime,betFleg,betimgHome,betimgAway,betStatus) VALUES (%s,%s, %s,%s,%s,%s,%s,%s)"
            val = [
-               (headerRe1,header_1[2].text, header_1[3].text,matchtimeRe,flag,hometeamimg,awayteamimg)
+               (headerRe1,header_1[2].text, header_1[3].text,date_time_obj_bkk,flag,hometeamimg,awayteamimg,betStatus_1)
 
            ]
 
-           mycursor.executemany(sql, val)
 
+           mycursor.executemany(sql, val)
            mydb.commit()
+
+           connection = mysql.connector.connect(host='202.129.206.136',
+                                                database="darunph3_bet",
+                                                user='darunph3',
+                                                password='Por19030703')
+           sql_Query = "SELECT betTime FROM betTeamName where betName =%s"
+           betName = (headerRe1,)
+
+           cursor = connection.cursor(buffered=True)
+           cursor.execute(sql_Query, betName)
+           record = cursor.fetchone()
+           # selecting column value into varible
+           betTime_value = str(record[0])
+           print(betTime_value)
 
            print(mycursor.rowcount, "was inserted.")
 
 
+           print('===========================================================================================')
+
+
      schedule.every(2).seconds.do(job)
-
-
-
-
      while True:
         schedule.run_pending()
+        time.sleep(1)
 
-
-if __name__=='__main__':
-	try:
-		my_main_function()
-	except:
-		my_main_function()
+while True:
+   main()
+   raw_input("DFfffffffffffffff")
