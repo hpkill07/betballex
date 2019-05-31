@@ -99,11 +99,8 @@ def main():
            print(matchtime_1[1].text)
            print(array1)
            print(type(date_time_obj_bkk))
-           date_format = '%Y-%m-%d %H:%M:%S'
-           a = datetime.strptime(date_time_obj_bkk, date_format)
-           b = datetime.strptime(nowdatetime, date_format)
            nowdatetime = datetime.strptime(dt_string, '%Y-%m-%d %H:%M:%S')
-           if a >= b:
+           if date_time_obj_bkk >= nowdatetime:
               betStatus_1 = "0"
               print("not yet")
            else:
@@ -192,7 +189,7 @@ def main():
            print('===========================================================================================')
 
 
-     schedule.every(2).seconds.do(job)
+     schedule.every(100).seconds.do(job)
      while True:
         schedule.run_pending()
         time.sleep(1)
