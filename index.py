@@ -11,9 +11,6 @@ import xml.etree.cElementTree as ET
 import ftplib
 from pathlib import Path
 import mysql.connector
-import wget
-import mysql.connector
-import requests
 import sys
 from os import execl
 import numpy as np
