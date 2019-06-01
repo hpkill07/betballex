@@ -26,6 +26,10 @@ def main():
         )
 
         mycursor = mydb.cursor()
+
+        mycursor.execute("DELETE betList FROM betList INNER JOIN betTeamName on betList.betListLink = betTeamName.betLink where betTeamName.betStatus = '1'")
+        mydb.commit()
+        print(mycursor.rowcount, "record(s) deleted")
         mycursor.execute("SELECT betListLink FROM betList")
         myresult = mycursor.fetchall()
         for xlink in myresult:
@@ -176,7 +180,7 @@ def main():
            print('===========================================================================================')
 
 
-     schedule.every(10).seconds.do(job)
+     schedule.every(100).seconds.do(job)
      while True:
         schedule.run_pending()
         time.sleep(1)
