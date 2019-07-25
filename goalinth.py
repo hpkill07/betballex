@@ -65,19 +65,19 @@ for data_x in utable:
         data_x3_nonum = re.sub(r'\d+', '',strip_tags(data_x3_2))
         thainameHome = data_x3_nonum.replace('[]','')
         thainameHome1 = thainameHome.replace(' ', '')
-        print(thainameHome1)
+        thainameHome2 = thainameHome1.replace('(N)', '')
 
-        
+
         print(strip_tags(data_x5_2))
         data_x5_nonum = re.sub(r'\d+', '', strip_tags(data_x5_2))
         thainameAway = data_x5_nonum.replace('(N)', '')
-        home = thainameAway.replace('[]', '')
+        away = thainameAway.replace('[]', '')
 
         print(data_x6.text)
         print(data_x7.text)
 
 
-        data_in = home
+        data_in = thainameHome2
         def do(s):
             rng_full = range(len(s))
             m = re.search('\[(.+?)\]', s)
@@ -98,9 +98,27 @@ for data_x in utable:
 
             print(do(l))
 
+        data_in = away
 
 
+        def do(s):
+            rng_full = range(len(s))
+            m = re.search('\[(.+?)\]', s)
+            try:
+                if m:
+                    rng_tag = range(*m.span())
+                    rng_out = (x for x in rng_full if x not in rng_tag)
+                    return ''.join(l[n] for n in rng_out)
+                else:
+                    return s
+            except:
+                return s
 
+
+        lines = [l for l in data_in.split('\n') if len(l) > 0]
+
+        for l in lines:
+            print(do(l))
 
         try:
          data_8_2 = data_8_1['href'].replace('../','')
